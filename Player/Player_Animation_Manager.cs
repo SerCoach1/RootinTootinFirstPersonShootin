@@ -49,7 +49,7 @@ public class Player_Animation_Manager : AnimationPlayer
 		{"Knife_unequip",1.0f}
 	};
 
-	string currentState = null;
+	public string currentState = null;
 
 	public delegate void FiringFunction();
 	public FiringFunction callbackFunction = null;
@@ -63,7 +63,7 @@ public class Player_Animation_Manager : AnimationPlayer
 		Connect("animation_finished", this, "animationEnded");
 	}
 
-	private bool setAnimation(string animationName)
+	public bool setAnimation(string animationName)
 	{
 		if (animationName == currentState)
 		{

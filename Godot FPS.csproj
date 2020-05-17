@@ -53,8 +53,10 @@
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Bullet_Scene.cs" />
     <Compile Include="Player\Player.cs" />
     <Compile Include="Player\Player_Animation_Manager.cs" />
+    <Compile Include="Player\WeaponPistol.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

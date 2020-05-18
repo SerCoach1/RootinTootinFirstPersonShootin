@@ -29,7 +29,7 @@ public class Player : KinematicBody
 
 	private string currentWeaponName = "UNARMED";
 
-	public Dictionary<string, Node> weapons = new Dictionary<string, Node>()
+	public Dictionary<string, Weapon> weapons = new Dictionary<string, Weapon>()
 	{
 		{"UNARMED",null}, {"KNIFE",null}, {"PISTOL",null}, {"RIFLE",null}
 	};
@@ -41,7 +41,7 @@ public class Player : KinematicBody
 	{
 		{"UNARMED",0}, {"KNIFE",1}, {"PISTOL",2}, {"RIFLE",3}
 	};
-	private bool changingWeapons = false;
+	private bool changingWeapon = false;
 	private string changingWeaponName = "UNARMED";
 
 	private int health = 100;
@@ -70,33 +70,27 @@ public class Player : KinematicBody
 			var weaponNode = weapons[weapon.Key];
 			if (weaponNode != null)
 			{
-				switch (weapon.Key)
-				{
-					case "KNIFE":
-						var knife = (WeaponKnife)weaponNode;
-						knife.playerNode = this;
-						knife.LookAt(gunAimPointPos, new Vector3(0,1,0));
-						knife.RotateObjectLocal(new Vector3(0, 1, 0), Mathf.Deg2Rad(180));
-						break;
-					case "PISTOL":
-						//do same shit again? need better solution (inheritance?)
-						break;
-				}
+				weaponNode.playerNode = this;
+				weaponNode.LookAt(gunAimPointPos, new Vector3(0, 1, 0));
+				weaponNode.RotateObjectLocal(new Vector3(0, 1, 0), Mathf.Deg2Rad(180));
 			}
 		}
 
 		currentWeaponName = "UNARMED";
 		changingWeaponName = "UNARMED";
 
+		UIStatusLabel = GetNode<Label>("HUD/Panel/Gun_label");
+		// flashlight = $Rotation_Helper/Flashlight
 	}
 
 	public override void _PhysicsProcess(float delta)
 	{
-		ProcessInput(delta);
-		ProcessMovement(delta);
+		processInput(delta);
+		processMovement(delta);
+		processChangingWeapons(delta);
 	}
 
-	private void ProcessInput(float delta)
+	private void processInput(float delta)
 	{
 		//  -------------------------------------------------------------------
 		//  Walking
@@ -140,9 +134,57 @@ public class Player : KinematicBody
 				Input.SetMouseMode(Input.MouseMode.Visible);
 		}
 		//  -------------------------------------------------------------------
+
+		// Changing Weapons
+		var weaponChangeNumber = WEAPON_NAME_TO_NUMBER[currentWeaponName];
+
+		if (Input.IsKeyPressed((int)KeyList.Key1))
+		{
+			weaponChangeNumber = 0;
+		}
+		else if (Input.IsKeyPressed((int)KeyList.Key2))
+		{
+			weaponChangeNumber = 1;
+		}
+		else if (Input.IsKeyPressed((int)KeyList.Key3))
+		{
+			weaponChangeNumber = 2;
+		}
+		else if (Input.IsKeyPressed((int)KeyList.Key4))
+		{
+			weaponChangeNumber = 3;
+		}
+
+		if (Input.IsActionJustPressed("Shift_weapon_positive"))
+		{
+			weaponChangeNumber += 1;
+		}
+		else if (Input.IsActionJustPressed("Shift_weapon_negative"))
+		{
+			weaponChangeNumber -= 1;
+		}
+
+		weaponChangeNumber = Mathf.Clamp(weaponChangeNumber, 0, WEAPON_NAME_TO_NUMBER.Count - 1);
+
+		if (!changingWeapon && WEAPON_NUMBER_TO_NAME[weaponChangeNumber] != currentWeaponName)
+		{
+			changingWeaponName = WEAPON_NUMBER_TO_NAME[weaponChangeNumber];
+			changingWeapon = true;
+		}
+		//  -------------------------------------------------------------------
+
+		// Firing the weapons
+		if (Input.IsActionPressed("fire") && !changingWeapon)
+		{
+			var currentWeapon = weapons[currentWeaponName];
+			if (currentWeapon != null && animManager.currentState == currentWeapon.IDLE_ANIM_NAME)
+			{
+				animManager.setAnimation(currentWeapon.FIRE_ANIM_NAME);
+			}
+		}
 	}
 
-	private void ProcessMovement(float delta)
+	private void processMovement(float delta)
 	{
 		_dir.y = 0;
 		_dir = _dir.Normalized();
@@ -180,5 +222,69 @@ public class Player : KinematicBody
 			cameraRot.x = Mathf.Clamp(cameraRot.x, -70, 70);
 			_rotationHelper.RotationDegrees = cameraRot;
 		}
+	}
+
+	public void processChangingWeapons(float delta)
+	{
+		if (changingWeapon)
+		{
+			var weaponUnequipped = false;
+			var currentWeapon = weapons[currentWeaponName];
+
+			if (currentWeapon == null)
+			{
+				weaponUnequipped = true;
+			}
+			else
+			{
+				if (currentWeapon.isWeaponEnabled)
+				{
+					weaponUnequipped = currentWeapon.unequipWeapon();
+				}
+				else
+				{
+					weaponUnequipped = true;
+				}
+			}
+
+			if (weaponUnequipped)
+			{
+				var weaponEquipped = false;
+				var weaponToEquip = weapons[changingWeaponName];
+
+				if (weaponToEquip == null)
+				{
+					weaponEquipped = true;
+				}
+				else
+				{
+					if (!weaponToEquip.isWeaponEnabled)
+					{
+						weaponEquipped = weaponToEquip.equipWeapon();
+					}
+					else
+					{
+						weaponEquipped = true;
+					}
+				}
+
+				if(weaponEquipped)
+				{
+					changingWeapon = false;
+					currentWeaponName = changingWeaponName;
+					changingWeaponName = String.Empty;
+				}
+			}
+		}
+	}
+
+	public void fire_bullet()
+	{
+		if(changingWeapon)
+		{
+			return;
+		}
+
+		weapons[currentWeaponName].fireWeapon();
 	}
 }

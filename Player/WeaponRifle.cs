@@ -24,9 +24,9 @@ public class WeaponRifle : Weapon
 		{
 			var body = ray.GetCollider();
 
-			if(body != playerNode && body.HasMethod("bullet_hit"))
+			if (body != playerNode && body.HasMethod("bullet_hit"))
 			{
-			    body.Call("bullet_hit", DAMAGE, ray.GlobalTransform);
+				body.Call("bullet_hit", DAMAGE, ray.GlobalTransform);
 			}
 		}
 	}

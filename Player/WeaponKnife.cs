@@ -21,10 +21,10 @@ public class WeaponKnife : Weapon
 
 		foreach (Godot.Object body in bodies)
 		{
-            // if(body != playerNode && body.HasMethod("bullet_hit"))
-            // {
-            //     body.bullet_hit(DAMAGE, area.GlobalTransform);
-            // }
+            if(body != playerNode && body.HasMethod("bullet_hit"))
+            {
+				body.Call("bullet_hit", DAMAGE, area.GlobalTransform);
+            }
 		}
 	}
 }

@@ -4156,7 +4156,6 @@ material/0 = null
 
 [node name="Flashlight" type="SpotLight" parent="Rotation_Helper"]
 transform = Transform( 1, 0, 0, 0, -1, 8.74228e-08, 0, -8.74228e-08, -1, 0, -0.307539, -0.0646362 )
-visible = false
 light_color = Color( 1, 0.915375, 0.769531, 1 )
 light_energy = 0.8
 spot_range = 30.0
@@ -4263,6 +4262,9 @@ custom_colors/font_color = Color( 1, 1, 1, 1 )
 text = "Health: 100
 Ammo: 000/000
 "
+__meta__ = {
+"_edit_use_anchors_": false
+}
 
 [node name="Death_Screen" type="ColorRect" parent="HUD"]
 visible = false

@@ -1,22 +1,22 @@
 using Godot;
 using System;
 
-public class WeaponPistol : Spatial
+public class WeaponPistol : Weapon
 {
-    private const float DAMAGE = 15.0f;
-    private const string IDLE_ANIM_NAME = "Pistol_idle";
-    private const string FIRE_ANIM_NAME = "Pistol_fire";
-    private bool isWeaponEnabled = false;
     private PackedScene bullet_scene;
-    private Player_Animation_Manager animManager = null;
-    public Player playerNode = null;
     public override void _Ready()
     {
+        DAMAGE = 15.0f;
+		IDLE_ANIM_NAME = "Pistol_idle";
+		FIRE_ANIM_NAME = "Pistol_fire";
+		IDLE_UNARMED_ANIM = "Idle_unarmed";
+		WPN_UNEQUIP_ANIM = "Pistol_unequip";
+        WPN_EQUIP_ANIM = "Pistol_equip";
         bullet_scene = (PackedScene)ResourceLoader.Load("Bullet_Scene.tscn");
-        animManager = GetNode<Player_Animation_Manager>("Animation_Player");
+        animManager = GetNode<Player_Animation_Manager>("../../Model/Animation_Player");
     }
 
-    private void fireWeapon()
+    public override void fireWeapon()
     {
         // Spawn bullet
         var clone = bullet_scene.Instance();
@@ -28,40 +28,5 @@ public class WeaponPistol : Spatial
         bullet.GlobalTransform = this.GlobalTransform;
         bullet.Scale = new Vector3(4,4,4);
         bullet.BULLET_DAMAGE = DAMAGE;
-    }
-
-    private bool equipWeapon()
-    {
-        if(animManager.currentState == IDLE_ANIM_NAME)
-        {
-            isWeaponEnabled = true;
-            return true;
-        }
-
-        if(animManager.currentState == "Idle_unarmed")
-        {
-            animManager.setAnimation("Pistol_equip");
-        }
-
-        return false;
-    }
-
-    private bool unequipWeapon()
-    {
-        if(animManager.currentState == IDLE_ANIM_NAME)
-        {
-            if(animManager.currentState != "Pistol_unequip")
-            {
-                animManager.setAnimation("Pistol_unequip");
-            }
-        }
-
-        if(animManager.currentState == "Idle_unarmed")
-        {
-            isWeaponEnabled = false;
-            return true;
-        }
-
-        return false;
     }
 }

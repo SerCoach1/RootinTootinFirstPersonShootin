@@ -1,127 +1,184 @@
 using Godot;
 using System;
+using System.Collections.Generic;
 
 public class Player : KinematicBody
 {
-    [Export]
-    public float Gravity = -24.8f;
-    [Export]
-    public float MaxSpeed = 20.0f;
-    [Export]
-    public float JumpSpeed = 18.0f;
-    [Export]
-    public float Accel = 4.5f;
-    [Export]
-    public float Deaccel = 16.0f;
-    [Export]
-    public float MaxSlopeAngle = 40.0f;
-    [Export]
-    public float MouseSensitivity = 0.05f;
+	[Export]
+	public float Gravity = -24.8f;
+	[Export]
+	public float MaxSpeed = 20.0f;
+	[Export]
+	public float JumpSpeed = 18.0f;
+	[Export]
+	public float Accel = 4.5f;
+	[Export]
+	public float Deaccel = 16.0f;
+	[Export]
+	public float MaxSlopeAngle = 40.0f;
+	[Export]
+	public float MouseSensitivity = 0.05f;
 
-    private Vector3 _vel = new Vector3();
-    private Vector3 _dir = new Vector3();
+	private Vector3 _vel = new Vector3();
+	private Vector3 _dir = new Vector3();
 
-    private Camera _camera;
-    private Spatial _rotationHelper;
+	private Camera _camera;
+	private Spatial _rotationHelper;
 
-    // Called when the node enters the scene tree for the first time.
-    public override void _Ready()
-    {
-        _camera = GetNode<Camera>("Rotation_Helper/Camera");
-        _rotationHelper = GetNode<Spatial>("Rotation_Helper");
+	private Player_Animation_Manager animManager = null;
 
-        Input.SetMouseMode(Input.MouseMode.Captured);
-    }
+	private string currentWeaponName = "UNARMED";
 
-    public override void _PhysicsProcess(float delta)
-    {
-        ProcessInput(delta);
-        ProcessMovement(delta);
-    }
+	public Dictionary<string, Node> weapons = new Dictionary<string, Node>()
+	{
+		{"UNARMED",null}, {"KNIFE",null}, {"PISTOL",null}, {"RIFLE",null}
+	};
+	public readonly Dictionary<int, string> WEAPON_NUMBER_TO_NAME = new Dictionary<int, string>()
+	{
+		{0,"UNARMED"}, {1,"KNIFE"}, {2,"PISTOL"}, {3,"RIFLE"}
+	};
+	public readonly Dictionary<string, int> WEAPON_NAME_TO_NUMBER = new Dictionary<string, int>()
+	{
+		{"UNARMED",0}, {"KNIFE",1}, {"PISTOL",2}, {"RIFLE",3}
+	};
+	private bool changingWeapons = false;
+	private string changingWeaponName = "UNARMED";
 
-    private void ProcessInput(float delta)
-    {
-        //  -------------------------------------------------------------------
-        //  Walking
-        _dir = new Vector3();
-        Transform camXform = _camera.GlobalTransform;
+	private int health = 100;
 
-        Vector2 inputMovementVector = new Vector2();
+	private Label UIStatusLabel;
 
-        if (Input.IsActionPressed("movement_forward"))
-            inputMovementVector.y += 1;
-        if (Input.IsActionPressed("movement_backward"))
-            inputMovementVector.y -= 1;
-        if (Input.IsActionPressed("movement_left"))
-            inputMovementVector.x -= 1;
-        if (Input.IsActionPressed("movement_right"))
-            inputMovementVector.x += 1;
+	// Called when the node enters the scene tree for the first time.
+	public override void _Ready()
+	{
+		_camera = GetNode<Camera>("Rotation_Helper/Camera");
+		_rotationHelper = GetNode<Spatial>("Rotation_Helper");
+		animManager = (Player_Animation_Manager)GetNode<AnimationPlayer>("Rotation_Helper/Model/Animation_Player");
+		//TODO: hook up bullet firing method
+		//animManager.callbackFunction = fireBullet;
 
-        inputMovementVector = inputMovementVector.Normalized();
+		Input.SetMouseMode(Input.MouseMode.Captured);
 
-        // Basis vectors are already normalized.
-        _dir += -camXform.basis.z * inputMovementVector.y;
-        _dir += camXform.basis.x * inputMovementVector.x;
-        //  -------------------------------------------------------------------
+		weapons["KNIFE"] = GetNode<WeaponKnife>("Rotation_Helper/Gun_Fire_Points/Knife_Point");
+		weapons["PISTOL"] = GetNode<WeaponPistol>("Rotation_Helper/Gun_Fire_Points/Pistol_Point");
+		weapons["RIFLE"] = GetNode<WeaponRifle>("Rotation_Helper/Gun_Fire_Points/Rifle_Point");
 
-        //  -------------------------------------------------------------------
-        //  Jumping
-        if (IsOnFloor())
-        {
-            if (Input.IsActionJustPressed("movement_jump"))
-                _vel.y = JumpSpeed;
-        }
-        //  -------------------------------------------------------------------
+		var gunAimPointPos = GetNode<Spatial>("Rotation_Helper/Gun_Aim_Point").GlobalTransform.origin;
 
-        //  -------------------------------------------------------------------
-        //  Capturing/Freeing the cursor
-        if (Input.IsActionJustPressed("ui_cancel"))
-        {
-            if (Input.GetMouseMode() == Input.MouseMode.Visible)
-                Input.SetMouseMode(Input.MouseMode.Captured);
-            else
-                Input.SetMouseMode(Input.MouseMode.Visible);
-        }
-        //  -------------------------------------------------------------------
-    }
+		foreach (var weapon in weapons)
+		{
+			var weaponNode = weapons[weapon.Key];
+			if (weaponNode != null)
+			{
+				switch (weapon.Key)
+				{
+					case "KNIFE":
+						var knife = (WeaponKnife)weaponNode;
+						knife.playerNode = this;
+						knife.LookAt(gunAimPointPos, new Vector3(0,1,0));
+						knife.RotateObjectLocal(new Vector3(0, 1, 0), Mathf.Deg2Rad(180));
+						break;
+					case "PISTOL":
+						//do same shit again? need better solution (inheritance?)
+						break;
+				}
+			}
+		}
 
-    private void ProcessMovement(float delta)
-    {
-        _dir.y = 0;
-        _dir = _dir.Normalized();
+		currentWeaponName = "UNARMED";
+		changingWeaponName = "UNARMED";
 
-        _vel.y += delta * Gravity;
+	}
 
-        Vector3 hvel = _vel;
-        hvel.y = 0;
+	public override void _PhysicsProcess(float delta)
+	{
+		ProcessInput(delta);
+		ProcessMovement(delta);
+	}
 
-        Vector3 target = _dir;
+	private void ProcessInput(float delta)
+	{
+		//  -------------------------------------------------------------------
+		//  Walking
+		_dir = new Vector3();
+		Transform camXform = _camera.GlobalTransform;
 
-        target *= MaxSpeed;
+		Vector2 inputMovementVector = new Vector2();
 
-        float accel;
-        if (_dir.Dot(hvel) > 0)
-            accel = Accel;
-        else
-            accel = Deaccel;
+		if (Input.IsActionPressed("movement_forward"))
+			inputMovementVector.y += 1;
+		if (Input.IsActionPressed("movement_backward"))
+			inputMovementVector.y -= 1;
+		if (Input.IsActionPressed("movement_left"))
+			inputMovementVector.x -= 1;
+		if (Input.IsActionPressed("movement_right"))
+			inputMovementVector.x += 1;
 
-        hvel = hvel.LinearInterpolate(target, accel * delta);
-        _vel.x = hvel.x;
-        _vel.z = hvel.z;
-        _vel = MoveAndSlide(_vel, new Vector3(0, 1, 0), false, 4, Mathf.Deg2Rad(MaxSlopeAngle));
-    }
+		inputMovementVector = inputMovementVector.Normalized();
 
-    public override void _Input(InputEvent @event)
-    {
-        if (@event is InputEventMouseMotion && Input.GetMouseMode() == Input.MouseMode.Captured)
-        {
-            InputEventMouseMotion mouseEvent = @event as InputEventMouseMotion;
-            _rotationHelper.RotateX(Mathf.Deg2Rad(mouseEvent.Relative.y * MouseSensitivity));
-            RotateY(Mathf.Deg2Rad(-mouseEvent.Relative.x * MouseSensitivity));
+		// Basis vectors are already normalized.
+		_dir += -camXform.basis.z * inputMovementVector.y;
+		_dir += camXform.basis.x * inputMovementVector.x;
+		//  -------------------------------------------------------------------
 
-            Vector3 cameraRot = _rotationHelper.RotationDegrees;
-            cameraRot.x = Mathf.Clamp(cameraRot.x, -70, 70);
-            _rotationHelper.RotationDegrees = cameraRot;
-        }
-    }
+		//  -------------------------------------------------------------------
+		//  Jumping
+		if (IsOnFloor())
+		{
+			if (Input.IsActionJustPressed("movement_jump"))
+				_vel.y = JumpSpeed;
+		}
+		//  -------------------------------------------------------------------
+
+		//  -------------------------------------------------------------------
+		//  Capturing/Freeing the cursor
+		if (Input.IsActionJustPressed("ui_cancel"))
+		{
+			if (Input.GetMouseMode() == Input.MouseMode.Visible)
+				Input.SetMouseMode(Input.MouseMode.Captured);
+			else
+				Input.SetMouseMode(Input.MouseMode.Visible);
+		}
+		//  -------------------------------------------------------------------
+	}
+
+	private void ProcessMovement(float delta)
+	{
+		_dir.y = 0;
+		_dir = _dir.Normalized();
+
+		_vel.y += delta * Gravity;
+
+		Vector3 hvel = _vel;
+		hvel.y = 0;
+
+		Vector3 target = _dir;
+
+		target *= MaxSpeed;
+
+		float accel;
+		if (_dir.Dot(hvel) > 0)
+			accel = Accel;
+		else
+			accel = Deaccel;
+
+		hvel = hvel.LinearInterpolate(target, accel * delta);
+		_vel.x = hvel.x;
+		_vel.z = hvel.z;
+		_vel = MoveAndSlide(_vel, new Vector3(0, 1, 0), false, 4, Mathf.Deg2Rad(MaxSlopeAngle));
+	}
+
+	public override void _Input(InputEvent @event)
+	{
+		if (@event is InputEventMouseMotion && Input.GetMouseMode() == Input.MouseMode.Captured)
+		{
+			InputEventMouseMotion mouseEvent = @event as InputEventMouseMotion;
+			_rotationHelper.RotateX(Mathf.Deg2Rad(mouseEvent.Relative.y * MouseSensitivity));
+			RotateY(Mathf.Deg2Rad(-mouseEvent.Relative.x * MouseSensitivity));
+
+			Vector3 cameraRot = _rotationHelper.RotationDegrees;
+			cameraRot.x = Mathf.Clamp(cameraRot.x, -70, 70);
+			_rotationHelper.RotationDegrees = cameraRot;
+		}
+	}
 }

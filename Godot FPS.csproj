@@ -59,6 +59,7 @@
     <Compile Include="Player\WeaponKnife.cs" />
     <Compile Include="Player\WeaponPistol.cs" />
     <Compile Include="Player\WeaponRifle.cs" />
+    <Compile Include="Player\Weapon.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

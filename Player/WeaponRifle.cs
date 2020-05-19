@@ -26,6 +26,7 @@ public class WeaponRifle : Weapon
 
 			if (body != playerNode && body.HasMethod("bullet_hit"))
 			{
+				GD.Print("Has Method");
 				body.Call("bullet_hit", DAMAGE, ray.GlobalTransform);
 			}
 		}

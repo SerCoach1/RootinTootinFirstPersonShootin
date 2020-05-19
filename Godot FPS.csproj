@@ -61,6 +61,7 @@
     <Compile Include="Player\WeaponRifle.cs" />
     <Compile Include="Player\Weapon.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RigidbodyHitTest.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

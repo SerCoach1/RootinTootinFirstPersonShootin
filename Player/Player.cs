@@ -55,7 +55,7 @@ public class Player : KinematicBody
 		_rotationHelper = GetNode<Spatial>("Rotation_Helper");
 		animManager = (Player_Animation_Manager)GetNode<AnimationPlayer>("Rotation_Helper/Model/Animation_Player");
 		//TODO: hook up bullet firing method
-		//animManager.callbackFunction = fireBullet;
+		animManager.callbackFunction = fire_bullet;
 
 		Input.SetMouseMode(Input.MouseMode.Captured);
 

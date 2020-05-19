@@ -19,14 +19,13 @@ public class WeaponPistol : Weapon
 	public override void fireWeapon()
 	{
 		// Spawn bullet
-		var clone = bullet_scene.Instance();
-		GetTree().Root.AddChild(clone);
+		var clone = (Bullet_Scene)bullet_scene.Instance();
+		var scene_root = (Node)GetTree().Root.GetChildren()[0];
+		scene_root.AddChild(clone);
 
-		// Find created bullet 
-		var bullet = GetNode<Bullet_Scene>("Bullet_Scene");
 		// Set bullet parameters
-		bullet.GlobalTransform = this.GlobalTransform;
-		bullet.Scale = new Vector3(4, 4, 4);
-		bullet.BULLET_DAMAGE = DAMAGE;
+		clone.GlobalTransform = this.GlobalTransform;
+		clone.Scale = new Vector3(4, 4, 4);
+		clone.BULLET_DAMAGE = DAMAGE;
 	}
 }

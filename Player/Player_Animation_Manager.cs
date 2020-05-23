@@ -31,22 +31,22 @@ public class Player_Animation_Manager : AnimationPlayer
 	{
 		{"Idle_unarmed",1.0f},
 
-		{"Pistol_equip",1.4f},
+		{"Pistol_equip",2.4f},
 		{"Pistol_fire",1.8f},
 		{"Pistol_idle",1.0f},
 		{"Pistol_reload",1.0f},
-		{"Pistol_unequip",1.4f},
+		{"Pistol_unequip",2.4f},
 
-		{"Rifle_equip",2.0f},
+		{"Rifle_equip",3.0f},
 		{"Rifle_fire",6.0f},
 		{"Rifle_idle",1.0f},
 		{"Rifle_reload",1.45f},
-		{"Rifle_unequip",2.0f},
+		{"Rifle_unequip",3.0f},
 
-		{"Knife_equip",1.0f},
+		{"Knife_equip",2.0f},
 		{"Knife_fire",1.35f},
 		{"Knife_idle",1.0f},
-		{"Knife_unequip",1.0f}
+		{"Knife_unequip",2.0f}
 	};
 
 	public string currentState = null;

@@ -7,6 +7,10 @@ public class WeaponPistol : Weapon
 	public override void _Ready()
 	{
 		DAMAGE = 15.0f;
+		MAG_SIZE = 10;
+		ammoInWeapon = MAG_SIZE;
+		spareAmmo = 90;
+		RELOADING_ANIM_NAME = "Pistol_reload";
 		IDLE_ANIM_NAME = "Pistol_idle";
 		FIRE_ANIM_NAME = "Pistol_fire";
 		IDLE_UNARMED_ANIM = "Idle_unarmed";
@@ -27,5 +31,6 @@ public class WeaponPistol : Weapon
 		clone.GlobalTransform = this.GlobalTransform;
 		clone.Scale = new Vector3(4, 4, 4);
 		clone.BULLET_DAMAGE = DAMAGE;
+		ammoInWeapon --;
 	}
 }

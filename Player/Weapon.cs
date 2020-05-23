@@ -15,6 +15,15 @@ public abstract class Weapon : Spatial
 	public bool isWeaponEnabled = false;
 	protected Player_Animation_Manager animManager = null;
 	public Player playerNode = null;
+
+	public int ammoInWeapon; // amount in weapon currently
+	public int spareAmmo; // ammo in reserve
+	public int MAG_SIZE; // magazine size
+
+	public bool CAN_RELOAD = true;
+	public bool CAN_REFILL = true;
+
+	public string RELOADING_ANIM_NAME;
 	public override void _Ready()
 	{
 		animManager = (Player_Animation_Manager)GetNode<AnimationPlayer>("../../Model/Animation_Player");
@@ -55,6 +64,42 @@ public abstract class Weapon : Spatial
 			return true;
 		}
 
+		return false;
+	}
+
+	public virtual bool reloadWeapon()
+	{
+		var canReload = false;
+
+		if (playerNode.animManager.currentState == IDLE_ANIM_NAME)
+		{
+			canReload = true;
+		}
+
+		if (spareAmmo <= 0 || ammoInWeapon == MAG_SIZE)
+		{
+			canReload = false;
+		}
+
+		if (canReload)
+		{
+			var ammoNeeded = MAG_SIZE - ammoInWeapon;
+
+			if (spareAmmo >= ammoNeeded)
+			{
+				spareAmmo -= ammoNeeded;
+				ammoInWeapon = MAG_SIZE;
+			}
+			else
+			{
+				ammoInWeapon += spareAmmo;
+				spareAmmo = 0;
+			}
+
+			playerNode.animManager.setAnimation(RELOADING_ANIM_NAME);
+
+			return true;
+		}
 		return false;
 	}
 }

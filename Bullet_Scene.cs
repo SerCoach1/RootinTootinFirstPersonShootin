@@ -4,10 +4,10 @@ using System;
 public class Bullet_Scene : Spatial
 {
 
-	public float BULLET_SPEED = 70.0f;
+	public float BULLET_SPEED = 200.0f;
 	public float BULLET_DAMAGE = 15.0f;
 
-	public const float KILL_TIMER = 4.0f;
+	public const float KILL_TIMER = 2.0f;
 	float timer = 0.0f;
 
 	bool hitSomething = false;

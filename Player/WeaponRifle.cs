@@ -6,6 +6,10 @@ public class WeaponRifle : Weapon
 	public override void _Ready()
 	{
 		DAMAGE = 4.0f;
+		MAG_SIZE = 30;
+		ammoInWeapon = MAG_SIZE;
+		spareAmmo = 270;
+		RELOADING_ANIM_NAME = "Rifle_reload";
 		IDLE_ANIM_NAME = "Rifle_idle";
 		FIRE_ANIM_NAME = "Rifle_fire";
 		IDLE_UNARMED_ANIM = "Idle_unarmed";
@@ -26,9 +30,9 @@ public class WeaponRifle : Weapon
 
 			if (body != playerNode && body.HasMethod("bullet_hit"))
 			{
-				GD.Print("Has Method");
 				body.Call("bullet_hit", DAMAGE, ray.GlobalTransform);
 			}
 		}
+		ammoInWeapon--;
 	}
 }

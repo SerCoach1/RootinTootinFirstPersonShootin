@@ -25,9 +25,11 @@ public class Player : KinematicBody
 	private Camera _camera;
 	private Spatial _rotationHelper;
 
-	private Player_Animation_Manager animManager = null;
+	public Player_Animation_Manager animManager = null;
 
 	private string currentWeaponName = "UNARMED";
+
+	private bool reloadingWeapon = false;
 
 	public Dictionary<string, Weapon> weapons = new Dictionary<string, Weapon>()
 	{
@@ -88,6 +90,8 @@ public class Player : KinematicBody
 		processInput(delta);
 		processMovement(delta);
 		processChangingWeapons(delta);
+		processReloading(delta);
+		processUI(delta);
 	}
 
 	private void processInput(float delta)
@@ -166,7 +170,7 @@ public class Player : KinematicBody
 
 		weaponChangeNumber = Mathf.Clamp(weaponChangeNumber, 0, WEAPON_NAME_TO_NUMBER.Count - 1);
 
-		if (!changingWeapon && WEAPON_NUMBER_TO_NAME[weaponChangeNumber] != currentWeaponName)
+		if (!changingWeapon && !reloadingWeapon && WEAPON_NUMBER_TO_NAME[weaponChangeNumber] != currentWeaponName)
 		{
 			changingWeaponName = WEAPON_NUMBER_TO_NAME[weaponChangeNumber];
 			changingWeapon = true;
@@ -174,12 +178,48 @@ public class Player : KinematicBody
 		//  -------------------------------------------------------------------
 
 		// Firing the weapons
-		if (Input.IsActionPressed("fire") && !changingWeapon)
+		if (Input.IsActionPressed("fire") && !changingWeapon && !reloadingWeapon)
 		{
 			var currentWeapon = weapons[currentWeaponName];
-			if (currentWeapon != null && animManager.currentState == currentWeapon.IDLE_ANIM_NAME)
+			if (currentWeapon != null)
 			{
-				animManager.setAnimation(currentWeapon.FIRE_ANIM_NAME);
+				if(currentWeapon.ammoInWeapon > 0)
+				{
+					if(animManager.currentState == currentWeapon.IDLE_ANIM_NAME)
+					{
+						animManager.setAnimation(currentWeapon.FIRE_ANIM_NAME);
+					}
+				}
+				else
+				{
+					reloadingWeapon = true;
+				}
+			}
+		}
+		//  -------------------------------------------------------------------
+		// Reloading
+
+		if(!reloadingWeapon && !changingWeapon && Input.IsActionJustPressed("reload"))
+		{
+			var currentWeapon = weapons[currentWeaponName];
+			if(currentWeapon != null && currentWeapon.CAN_RELOAD)
+			{
+				var currentAnimState = animManager.currentState;
+				var isReloading = false;
+
+				foreach(var weapon in weapons)
+				{
+					var weaponNode = weapons[weapon.Key];
+					if(weaponNode != null && currentAnimState == weaponNode.RELOADING_ANIM_NAME)
+					{
+						isReloading = true;
+					}
+
+					if(!isReloading)
+					{
+						reloadingWeapon = true;
+					}
+				}
 			}
 		}
 	}
@@ -224,7 +264,7 @@ public class Player : KinematicBody
 		}
 	}
 
-	public void processChangingWeapons(float delta)
+	private void processChangingWeapons(float delta)
 	{
 		if (changingWeapon)
 		{
@@ -268,7 +308,7 @@ public class Player : KinematicBody
 					}
 				}
 
-				if(weaponEquipped)
+				if (weaponEquipped)
 				{
 					changingWeapon = false;
 					currentWeaponName = changingWeaponName;
@@ -280,11 +320,37 @@ public class Player : KinematicBody
 
 	public void fire_bullet()
 	{
-		if(changingWeapon)
+		if (changingWeapon)
 		{
 			return;
 		}
 
 		weapons[currentWeaponName].fireWeapon();
+	}
+
+	private void processUI(float delta)
+	{
+		if (currentWeaponName == "UNARMED" || currentWeaponName == "KNIFE")
+		{
+			UIStatusLabel.Text = "HEALTH: " + health;
+		}
+		else
+		{
+			var currentWeapon = weapons[currentWeaponName];
+			UIStatusLabel.Text = "HEALTH: " + health + System.Environment.NewLine + "AMMO: " + currentWeapon.ammoInWeapon + "/" + currentWeapon.spareAmmo;
+		}
+	}
+
+	private void processReloading(float delta)
+	{
+		if(reloadingWeapon)
+		{
+			var currentWeapon = weapons[currentWeaponName];
+			if(currentWeapon != null)
+			{
+				currentWeapon.reloadWeapon();
+			}
+			reloadingWeapon = false;
+		}
 	}
 }

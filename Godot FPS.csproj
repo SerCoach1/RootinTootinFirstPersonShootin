@@ -54,6 +54,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Bullet_Scene.cs" />
+    <Compile Include="HealthPickup.cs" />
     <Compile Include="Player\Player.cs" />
     <Compile Include="Player\Player_Animation_Manager.cs" />
     <Compile Include="Player\WeaponKnife.cs" />

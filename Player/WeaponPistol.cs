@@ -16,7 +16,7 @@ public class WeaponPistol : Weapon
 		IDLE_UNARMED_ANIM = "Idle_unarmed";
 		WPN_UNEQUIP_ANIM = "Pistol_unequip";
 		WPN_EQUIP_ANIM = "Pistol_equip";
-		bullet_scene = (PackedScene)ResourceLoader.Load("Bullet_Scene.tscn");
+		bullet_scene = (PackedScene)ResourceLoader.Load("assets/Bullet_Scene.tscn");
 		animManager = GetNode<Player_Animation_Manager>("../../Model/Animation_Player");
 	}
 

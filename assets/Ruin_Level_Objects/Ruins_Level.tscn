@@ -8,7 +8,8 @@
 [ext_resource path="res://assets/Gamemode_Objects/Gamemode_Flag_Red.tscn" type="PackedScene" id=6]
 [ext_resource path="res://assets/Ruin_Level_Objects/Debris_Pillar.tscn" type="PackedScene" id=7]
 [ext_resource path="res://assets/Ruin_Level_Objects/Debris.tscn" type="PackedScene" id=8]
-[ext_resource path="res://RigidbodyHitTest.cs" type="Script" id=9]
+[ext_resource path="res://Player/RigidbodyHitTest.cs" type="Script" id=9]
+
 
 [sub_resource type="ProceduralSky" id=1]
 radiance_size = 4

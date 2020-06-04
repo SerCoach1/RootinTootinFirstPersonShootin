@@ -16,8 +16,8 @@ _global_script_class_icons={
 [application]
 
 config/name="Godot FPS"
-run/main_scene="res://Testing_Area.tscn"
-config/icon="res://icon.png"
+run/main_scene="res://assets/Testing_Area.tscn"
+config/icon="res://assets/icon.png"
 
 [display]
 
@@ -130,4 +130,3 @@ change_grenade={
 [rendering]
 
 quality/filters/msaa=2
-environment/default_environment="res://default_env.tres"

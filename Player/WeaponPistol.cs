@@ -23,14 +23,14 @@ public class WeaponPistol : Weapon
 	public override void fireWeapon()
 	{
 		// Spawn bullet
-		var clone = (Bullet_Scene)bullet_scene.Instance();
+		var clone = (Spatial)bullet_scene.Instance();
 		var scene_root = (Node)GetTree().Root.GetChildren()[0];
 		scene_root.AddChild(clone);
 
 		// Set bullet parameters
 		clone.GlobalTransform = this.GlobalTransform;
 		clone.Scale = new Vector3(4, 4, 4);
-		clone.BULLET_DAMAGE = DAMAGE;
+		//clone.BULLET_DAMAGE = DAMAGE; bullet broken atm
 		ammoInWeapon --;
 	}
 }

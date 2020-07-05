@@ -8,3 +8,13 @@ export_presets.cfg
 .mono/
 data_*/
 mono_crash*
+
+# Scons files
+*.dblite
+*.os
+
+# Old files
+*.old
+
+# Library files
+*.so

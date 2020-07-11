@@ -22,8 +22,9 @@ namespace godot
 		Bullet();
 		~Bullet(); //DO NOT DECLARE IF YOU'RE NOT GOING TO IMPLEMENT
 		void _init();
-		void _PhysicsProcess(float delta);
-		void collided(PhysicsBody body);
+		void _physics_process(float delta);
+		void _ready();
+		void collided(PhysicsBody *body);
 	};
 } // namespace godot
 
